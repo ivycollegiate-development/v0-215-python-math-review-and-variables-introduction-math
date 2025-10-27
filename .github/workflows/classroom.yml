@@ -1,0 +1,49 @@
+name: Autograding Tests
+
+on:
+  push:
+  workflow_dispatch:
+  repository_dispatch:
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run student's script and check output
+        id: run-script
+        run: |
+          python python-yourname.py > output.txt
+          # Check for key outputs - these must match student's script output 
+          grep -q "Sum: 15" output.txt
+          grep -q "Difference: 5" output.txt
+          grep -q "Product: 50" output.txt
+          grep -q "Quotient: 2.0" output.txt
+          grep -q "Area: 50" output.txt
+          grep -q "10.0" output.txt       # Division example
+          grep -q "16" output.txt         # PEMDAS: 8 + 4 * 2
+          grep -q "24" output.txt         # PEMDAS: (8 + 4) * 2
+
+      - name: Check for variable usage (optional, for advanced)
+        run: |
+          # Simple grep checks can determine if key variable names were used,
+          # Adapt as appropriate for your assignment
+          grep -q "student_name" python-yourname.py
+          grep -q "student_age" python-yourname.py
+          grep -q "favorite_number" python-yourname.py
+          grep -q "current_age" python-yourname.py
+          grep -q "area = " python-yourname.py
+
+      - name: Check for Git commit(s)
+        run: |
+          git log --pretty=oneline | grep -q "Added variables and assignment practice"
+
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
